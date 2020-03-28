@@ -11,14 +11,14 @@ spec:
       - destination:
             host: reviews
             subset: v1
-       - destination:
+      - destination:
             host: reviews
             subset: v2
 ...
 
 ---
 apiVersion:
-kind:VirtualService
+kind: VirtualService
 metadata:
   name: reviews
 spec:
@@ -31,10 +31,10 @@ spec:
           subset: v1
         weight: 75
         timeout: 8s    #default 10 seconds
-      fault:               #fault injection - abort
-        abort:
-          percent: 10
-          httpStatus: 400
+        fault:               #fault injection - abort
+          abort:
+            percent: 10
+            httpStatus: 400
       - destination:
           host: reviews
           subset: v2
@@ -65,7 +65,7 @@ spec:
       - destination:
             host: ratings
             subset: v1
-       - destination:
+      - destination:
             host: ratings
             subset: v2
 ...
@@ -87,7 +87,7 @@ spec:
       - destination:
             host: ratings
             subset: v1
-       - destination:
+      - destination:
             host: ratings
             subset: v2
 ...
