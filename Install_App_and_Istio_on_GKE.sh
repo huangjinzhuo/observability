@@ -1,14 +1,14 @@
 #get user account
 gcloud auth list
-gcloud config get-value core/user
-export GCP_USER=$(gcloud config get-value user)
+gcloud config get-value core/account
+export GCP_USER=$(gcloud config get-value account)
 
 #get project
 gcloud projects list    # list all projects
 gcloud config get-value project
 export GCP_PROJECT=$(gcloud config get-value core/project)
 
-export CLUSTER_NAME=dev_cluster
+export CLUSTER_NAME=dev-cluster
 export CLUSTER_ZONE=us-central1-b
 export CLUSTER_VERSION=latest
 
@@ -17,8 +17,8 @@ gcloud container clusters create $CLUSTER_NAME \
 --zone $CLUSTER_ZONE \
 --num-nodes 4 \
 --machine-type n1-standard-2 \
---image-type COS \
---scopes gke-default, compute-rw \
+--image-type 'COS' \
+--scopes "gke-default", "compute-rw" \
 --cluster-version $CLUSTER_VERSION \
 --enable-autoscaling --min-nodes 4 --max-nodes 8 \
 --enable-stackdriver-kubernetes \
@@ -50,12 +50,12 @@ export PATH=$PATH:$PWD/bin
 
 # create namespace and, using helm, install Istio Custom Resource Definiations (CRDs)
 kubectl create namespace istio-system
-helm template install/kubernetes/helm/instio-init \
+helm template install/kubernetes/helm/istio-init \
 --name istio-init \
 --namespace istio-system \
 | kubectl apply -f -
 
-#check CRDs. 23 total.
+#check CRDs. 23 total, or more.
 kubectl get crds -n istio-system
 
 # install Istio with demo configuation
@@ -65,7 +65,8 @@ helm template install/kubernetes/helm/istio \
 --values install/kubernetes/helm/istio/values-istio-demo.yaml \
 | kubectl apply -f -
 # service installed:    istio-pilot, Mixer(istio-policy and istio-telemetry), istio-galley, istio-citadel, 
-#                       istio-ingressgateway, istio-sidecar-injector, and prometheus
+#                       istio-sidecar-injector, istio-ingressgateway, istio-egressgateway, and 
+#                       prometheus, grafana, kiali, zipkin, tracing, jaeger-query, jaeger-agent, jaeger-collector, jaeger-collector-headless
 
 kubectl get services -n istio-system
 kubectl get pods --namespace istio-system
@@ -74,24 +75,25 @@ kubectl get pods --namespace istio-system
 istioctl version
 
 # deploy the Bookinfo application
-kubectl apply -f < (istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
+kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
 
 kubectl get services
 kubectl get pods
 
-# check if Bookinfo app is running, by sending curl request from the  "details" container
-# which is in  "details-v1-xxxx" pod,  to productpage in productpage pod
-export DETAILS_POD=$(kubectl get pods -l name=details -o jsonpath='{.item[0].metadata.name}')
-kubectl exec -it $DETAILS_POD -c details \
---curl productpage:9080/productpage \
-| grep -o "<title>.*<title>"
+# check if Bookinfo app is running, by sending curl request from the  "ratings" container
+# which is in  "ratings-v1-xxxx" pod,  to productpage in productpage pod
+export RATINGS_POD=$(kubectl get pods -l app=ratings -o jsonpath='{.items[0].metadata.name}')
+kubectl exec -it $RATINGS_POD -c ratings -- curl productpage:9080/productpage \
+| grep -o "<title>.*</title>"
 # only want to show title of the page
 
 # open external access to the mesh, and get the external-ip
 kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 kubectl get gateway
 kubectl get svc -n istio-system istio-ingressgateway
-export EXTERNAL_IP=$(kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.item[0].metadata.EXTERNAL-IP}')
+export EXTERNAL_IP=$(kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 curl -I http://$EXTERNAL_IP/productpage
 
 # use Stackdriver Monitoring: Dashboard - Kuberentes Engine (New). Check tabs: INFRASTRUCTURE, WORKLOADS, SERVICES
+
+#clean up of the infrastructure
