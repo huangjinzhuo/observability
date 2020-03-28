@@ -49,16 +49,22 @@ cd istio-$ISTIO_VERSION
 export PATH=$PATH:$PWD/bin
 
 # create namespace and, using helm, install Istio Custom Resource Definiations (CRDs)
+# check CRDs. 23 total, or more.
+# install Istio with demo configuation
+# (Istio on GKE add-on can be installed when creating a GKE cluster:
+#     --addons=Istio --istio-config=auth=MTLS_STRICT
+# with the above two options, Istio is installed.
+# Istio open source version is installed with the following lines in this section)
+
 kubectl create namespace istio-system
+
 helm template install/kubernetes/helm/istio-init \
 --name istio-init \
 --namespace istio-system \
 | kubectl apply -f -
 
-#check CRDs. 23 total, or more.
 kubectl get crds -n istio-system
 
-# install Istio with demo configuation
 helm template install/kubernetes/helm/istio \
 --name istio \
 --namespace istio-system \
@@ -68,11 +74,13 @@ helm template install/kubernetes/helm/istio \
 #                       istio-sidecar-injector, istio-ingressgateway, istio-egressgateway, and 
 #                       prometheus, grafana, kiali, zipkin, tracing, jaeger-query, jaeger-agent, jaeger-collector, jaeger-collector-headless
 
+
 kubectl get services -n istio-system
 kubectl get pods --namespace istio-system
 
 #verify istio
 istioctl version
+
 
 # deploy the Bookinfo application
 kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
