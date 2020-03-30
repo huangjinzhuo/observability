@@ -101,6 +101,7 @@ kubectl get gateway
 kubectl get svc -n istio-system istio-ingressgateway
 export EXTERNAL_IP=$(kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 curl -I http://$EXTERNAL_IP/productpage
+for n in `seq 1 9`; do curl -s -o /dev/null http://$EXTERNAL_IP/productpage; done
 
 # use Stackdriver Monitoring: Dashboard - Kuberentes Engine (New). Check tabs: INFRASTRUCTURE, WORKLOADS, SERVICES
 
