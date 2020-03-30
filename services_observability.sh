@@ -44,6 +44,19 @@ export EXTERNAL_IP=$(kubectl get svc -n istio-system istio-ingressgateway -o jso
 for n in `seq 1 9`; do curl -s -o /dev/null http://$EXTERNAL_IP/productpage; done
 # open Jaeger UI  (Cloud Shell, Web Preview, change port: 20001, Change and Preview)
 # Review the traces. Find Traces: dropdown - productpage.default. Find Trace. Click spans to see detail.
-# Generate metrics data by sending traffic to application, from anather Cloud Shell ( + Add session):
 
+
+# port forwarding to Kiali
+kubectl port-forward -n istio-system \
+$(kubectl get pods -n istio-system -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001
+# Get EXTERNAL_IP, and send traffic
+export EXTERNAL_IP=$(kubectl get svc -n istio-system istio-ingressgateway -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+for n in `seq 1 9`; do curl -s -o /dev/null http://$EXTERNAL_IP/productpage; done
+# open Jaeger UI  (Cloud Shell, Web Preview, change port: 20001, Change and Preview)
+# login: admin admin.
+# top right corner, can adjust time range(last 1 m) for viewing data 
+# Generate JSON files for graphs and metrics:
+# Click Overview on the left menu panel and replace:
+# kiali/console/overview?duration=60&pi=15000      in browser URL with:
+# kiali/api/namespaces/graph?namespaces=default&graphType=app
 
