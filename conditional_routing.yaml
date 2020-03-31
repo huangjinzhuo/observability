@@ -1,0 +1,20 @@
+---
+apiVersion:
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+    - ratings
+  http:
+  - match:               #conditional routing: based on end-user
+    - headers:
+        end-user:
+          exact: jin
+    - route:
+      - destination:
+            host: ratings
+            subset: v1
+      - destination:
+            host: ratings
+            subset: v2
