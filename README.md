@@ -26,10 +26,6 @@ Nginx, Gunicorn and Flask
 To deploy Bookinfo:
 
 
-## Security Group Auto Remedy
-
-Second challenge is to automate some security remedy by using Cloud Trail, CloudWatch, and Lambda.
-
 
 ## Requirements
 
