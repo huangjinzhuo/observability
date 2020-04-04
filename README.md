@@ -11,21 +11,19 @@ Open Source Istio with Bookinfo applicaiton
 1. [DevOps](README.md#DevOps)
 
 
-## Hypster 
+## Bookinfo and Hypster 
 
-Heart Rate Moniotor is an Insight engineered application that takes in real-time streaming data to produce ECG records and display irregular patient information. The application could be used by healthcare providers to monitor any life-threathening events or to diagnose cardiac arrhythmia.
+This repo contains Bookinfo application and Hypster application.
 
 
 ## Deployment
 
-This DevOps project was to deploy the application data pipeline infrastructure with just one-click by using Terraform. Here are the core packages used in Hypster :
+To deploy Hypster :
 
 Python 3.6
 Nginx, Gunicorn and Flask
-Cassandra cluster
-Spark Streaming cluster
-Kafka cluster
-S3 Bucket
+
+To deploy Bookinfo:
 
 
 ## Security Group Auto Remedy
