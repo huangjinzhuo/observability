@@ -3,7 +3,7 @@ Open Source Istio with Bookinfo applicaiton
 
 
 ## Table of Contents
-1. [Hypster ](README.md#Heart_Rate_Monitor)
+1. [Hypster ](README.md#Hypster)
 1. [Deployment](README.md#Deployment)
 1. [Requirements](README.md#Requirements)
 1. [Platform Architecture](README.md#Platform_Architecture)
