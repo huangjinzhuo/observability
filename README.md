@@ -3,22 +3,22 @@ Open Source Istio with Bookinfo applicaiton
 
 
 ## Table of Contents
-1. [Heart Rate Monitor](README.md#Heart_Rate_Monitor)
-1. [Auto Deployment](README.md#Auto_Deployment)
+1. [Hypster ](README.md#Heart_Rate_Monitor)
+1. [Deployment](README.md#Deployment)
 1. [Requirements](README.md#Requirements)
 1. [Platform Architecture](README.md#Platform_Architecture)
 1. [Challenge](README.md#Challenge)
 1. [DevOps](README.md#DevOps)
 
 
-## Heart Rate Monitor
+## Hypster 
 
 Heart Rate Moniotor is an Insight engineered application that takes in real-time streaming data to produce ECG records and display irregular patient information. The application could be used by healthcare providers to monitor any life-threathening events or to diagnose cardiac arrhythmia.
 
 
-## Auto Deployment
+## Deployment
 
-This DevOps project was to deploy the application data pipeline infrastructure with just one-click by using Terraform. Here are the core packages used in Heart Rate Monitor:
+This DevOps project was to deploy the application data pipeline infrastructure with just one-click by using Terraform. Here are the core packages used in Hypster :
 
 Python 3.6
 Nginx, Gunicorn and Flask
