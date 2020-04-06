@@ -26,7 +26,6 @@ Nginx, Gunicorn and Flask
 To deploy Bookinfo:
 
 
-
 ## Requirements
 
 
