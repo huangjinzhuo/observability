@@ -36,7 +36,7 @@ $a -ne $bin
 
 # continuously check cluster status until it's RUNNING
 while true; do
-    if [[ '"RUNNING"' != $(gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .status') ]]
+    if [[ "RUNNING" != $(gcloud container clusters list --format json | jq -r '.[] | select(.name=="'${CLUSTER_NAME}'") | .status') ]]
     then
         printf "Checking cluster status...\n"
         printf "$CLUSTER_NAME is: "
@@ -101,8 +101,8 @@ helm template install/kubernetes/helm/istio \
 kubectl get services -n istio-system
 kubectl get pods --namespace istio-system
 
-#verify istio
-istioctl version
+# continuously check pods status until they are all Running/Completed
+$POD_STATUS=" "
 
 
 # deploy the Bookinfo application
