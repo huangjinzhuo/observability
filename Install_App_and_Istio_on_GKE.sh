@@ -2,17 +2,23 @@
 gcloud auth list
 gcloud config get-value core/account
 export GCP_USER=$(gcloud config get-value account)
+printf "GCP_USER=$GCP_USER"
 
 #get project
 gcloud projects list    # list all projects
 gcloud config get-value project
 export GCP_PROJECT=$(gcloud config get-value core/project)
+printf "GCP_PROJECT=$GCP_PROJECT"
 
 export CLUSTER_NAME=dev-cluster
 export CLUSTER_ZONE=us-central1-b
 export CLUSTER_VERSION=latest
+printf "CLUSTER_NAME=$CLUSTER_NAME"
+printf "CLUSTER_ZONE=$CLUSTER_ZONE"
+printf "CLUSTER_VERSION=$CLUSTER_VERSION"
 
 # create the GKE cluster (in default VPC)
+printf "Creating cluster $CLUSTER_NAME ..."
 gcloud container clusters create $CLUSTER_NAME \
 --zone $CLUSTER_ZONE \
 --num-nodes 4 \
@@ -25,6 +31,23 @@ gcloud container clusters create $CLUSTER_NAME \
 --enable-basic-auth
 
 gcloud container clusters list
+
+$a -ne $bin
+
+# continuously check cluster status until it's RUNNING
+while true; do
+    if [[ '"RUNNING"' != $(gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .status') ]]
+    then
+        printf "Checking cluster status...\n"
+        printf "$CLUSTER_NAME is: "
+        gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .status'
+        sleep 15
+    else
+        printf "$CLUSTER_NAME is: "
+        gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .status'
+        break
+    fi
+done
 
 # give user access to the cluster
 gcloud container clusters get-credentials $CLUSTER_NAME \
