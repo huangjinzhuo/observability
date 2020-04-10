@@ -32,8 +32,6 @@ gcloud container clusters create $CLUSTER_NAME \
 
 gcloud container clusters list
 
-$a -ne $bin
-
 # continuously check cluster status until it's RUNNING
 while true; do
     if [[ "RUNNING" != $(gcloud container clusters list --format json | jq -r '.[] | select(.name=="'${CLUSTER_NAME}'") | .status') ]]
