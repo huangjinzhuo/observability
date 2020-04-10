@@ -100,8 +100,17 @@ kubectl get services -n istio-system
 kubectl get pods --namespace istio-system
 
 # continuously check pods status until they are all Running/Completed
-$POD_STATUS=" "
-
+# POD_NO=${kubectl get pods -n istio-system -o jsonpath='{.status}' | wc -l }
+while true; do
+    POD_STATUS=${kubectl get pods -n istio-system -o jsonpath='{.item[?(.status!="Runninng" && .status!="Completed")].status}'}
+    if $POD_STATUS!=[]
+    then
+        echo "Checking pod status..."
+        ${kubectl get pods -n istio-system -o jsonpath='{.item[?(.status!="Runninng" && .status!="Completed")].metadata.name}: {.item[?(.status!="Runninng" && .status!="Completed")].status}'}
+    else
+        exit
+    fi
+done
 
 # deploy the Bookinfo application
 kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
