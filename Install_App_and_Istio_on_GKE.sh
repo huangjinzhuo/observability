@@ -24,7 +24,7 @@ gcloud container clusters create $CLUSTER_NAME \
 --num-nodes 4 \
 --machine-type n1-standard-2 \
 --image-type 'COS' \
---scopes "gke-default", "compute-rw" \
+--scopes "gke-default","compute-rw" \
 --cluster-version $CLUSTER_VERSION \
 --enable-autoscaling --min-nodes 4 --max-nodes 8 \
 --enable-stackdriver-kubernetes \
@@ -99,17 +99,44 @@ helm template install/kubernetes/helm/istio \
 kubectl get services -n istio-system
 kubectl get pods --namespace istio-system
 
-# continuously check pods status until they are all Running/Completed
+# continuously check pods status until they are all Running/Succeeded
 # POD_NO=${kubectl get pods -n istio-system -o jsonpath='{.status}' | wc -l }
+:' Colon Apostrophe starts off a comment block that ends with another Apostrophe 
+
 while true; do
-    POD_STATUS=${kubectl get pods -n istio-system -o jsonpath='{.item[?(.status!="Runninng" && .status!="Completed")].status}'}
+    POD_STATUS=${kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng" && .status.phase != "Succeeded")].status.phase}'}
     if $POD_STATUS!=[]
     then
         echo "Checking pod status..."
-        ${kubectl get pods -n istio-system -o jsonpath='{.item[?(.status!="Runninng" && .status!="Completed")].metadata.name}: {.item[?(.status!="Runninng" && .status!="Completed")].status}'}
+        ${kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng" && .status.phase != "Succeeded")].metadata.name}: {.items[?(.status.phase != "Runninng" && .status.phase != "Succeeded")].status.phase}'}
     else
         exit
     fi
+done
+
+'
+#### The above while loop logic works only when there is a single nexted condition. for example, remove this:      && .status.phase != "Succeeded"
+#### This is a know issue of JSONPath: JsonPath nested condition and multiple conditions are not working #20352
+#### https://github.com/kubernetes/kubernetes/issues/20352
+#### A workaround is the while loop following:
+
+all_running="false"
+while [[ $all_running != true ]]; do
+    POD_STATUS=($(kubectl get pods -n istio-system -o jsonpath='{.items[*].status.phase}'))
+    all_running="true"
+    for value in "${POD_STATUS[@]}"
+    do
+        echo $value
+        if [[ $value != "Running" ]] && [[ $value != "Succeeded" ]]
+        then
+            echo "Checking pod status..."
+            sleep 5
+            # ${kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng")].metadata.name}: {.items[?(.status.phase != "Runninng" )].status.phase}'}
+            kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng")].metadata.name}: {.items[?(.status.phase != "Runninng" )].status.phase}'
+            all_running="false"
+            break
+        fi
+    done
 done
 
 # deploy the Bookinfo application
@@ -135,4 +162,6 @@ for n in `seq 1 9`; do curl -s -o /dev/null http://$EXTERNAL_IP/productpage; don
 
 # use Stackdriver Monitoring: Dashboard - Kuberentes Engine (New). Check tabs: INFRASTRUCTURE, WORKLOADS, SERVICES
 
-#clean up of the infrastructure
+#So far the following barebone services has been installed: Istio, Propetheus, Jaeger, Kiali, Zipkin, Granfana.
+# We can use port forwarding to forward get in those services web screen to check it out, but nothing to see.
+# 
