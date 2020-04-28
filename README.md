@@ -1,4 +1,4 @@
-# Services Observability with Prometheus, Grafana, Jaeger, and Kiali
+# Service Observability with Prometheus, Grafana, Jaeger, & s Kiali
 Open Source Istio with Bookinfo applicaiton
 
 
