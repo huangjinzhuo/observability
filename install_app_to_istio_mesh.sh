@@ -1,66 +1,36 @@
-# requirement: Istio has been intalled into Google Kubernetes Engine. To install Istio into GKE, follow link:
-
+# This instruction are steps to install the sample app Bookinfo from Istio repo samples folder.
+# requirement: Istio has been intalled and running in Google Kubernetes Engine. To install Istio into GKE, follow link:
+# https://github.com/huangjinzhuo/observability/blob/master/install_istio_to_GKE.sh
 # 
 
-#get user account
-gcloud auth list
-gcloud config get-value core/account
-export GCP_USER=$(gcloud config get-value account)
-printf "GCP_USER=$GCP_USER"
+# Sign in to Google Cloud Platform Cloud Console with an account that has permission to manage the GKE and Istio
+# GCP Cloud Console: https://console.cloud.google.com/
+# select the project that has the GKE and Istio installed
+# click on  >_  to activate Cloud Shell from Cloud Console. All commands below are run in Cloud Shell
 
-#get project
-gcloud projects list    # list all projects
-gcloud config get-value project
-export GCP_PROJECT=$(gcloud config get-value core/project)
-printf "GCP_PROJECT=$GCP_PROJECT"
-
+# assign cluster name variable
 export CLUSTER_NAME=dev-cluster
-export CLUSTER_ZONE=us-central1-b
-export CLUSTER_VERSION=latest
-printf "CLUSTER_NAME=$CLUSTER_NAME"
-printf "CLUSTER_ZONE=$CLUSTER_ZONE"
-printf "CLUSTER_VERSION=$CLUSTER_VERSION"
 
-# create the GKE cluster (in default VPC)
-printf "Creating cluster $CLUSTER_NAME ..."
-gcloud container clusters create $CLUSTER_NAME \
---zone $CLUSTER_ZONE \
---num-nodes 4 \
---machine-type n1-standard-2 \
---image-type 'COS' \
---scopes "gke-default","compute-rw" \
---cluster-version $CLUSTER_VERSION \
---enable-autoscaling --min-nodes 4 --max-nodes 8 \
---enable-stackdriver-kubernetes \
---enable-basic-auth
+# get user account, project, and other env variables
+export GCP_USER=$(gcloud config get-value account)
+export GCP_PROJECT=$(gcloud config get-value core/project)
+export CLUSTER_ZONE=$(gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .zone' | awk -F'"' '{print $2}')
 
+# check if GKE cluster is running
 gcloud container clusters list
-
-# continuously check cluster status until it's RUNNING
-while true; do
-    if [[ "RUNNING" != $(gcloud container clusters list --format json | jq -r '.[] | select(.name=="'${CLUSTER_NAME}'") | .status') ]]
-    then
-        printf "Checking cluster status...\n"
-        printf "$CLUSTER_NAME is: "
-        gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .status'
-        sleep 15
-    else
-        printf "$CLUSTER_NAME is: "
-        gcloud container clusters list --format json | jq '.[] | select(.name=="'${CLUSTER_NAME}'") | .status'
-        break
-    fi
-done
+kubectl get pods
+# if you can't use kubectl, give yourself access to the cluster: 
 
 # give user access to the cluster
 gcloud container clusters get-credentials $CLUSTER_NAME \
 --project $GCP_PROJECT \
 --zone $CLUSTER_ZONE
-
 kubectl create clusterrolebinding cluster-admin-binding \
 --clusterrole cluster-admin \
 --user $GCP_USER
 
-# download Istio, which also have sample apps in samples folder
+# find application path. If not exist, download Istio, which also have sample apps in samples folder
+
 export APP_DIR=$HOME/bookinfo
 export ISTIO_VERSION=1.5.0
 mkdir $APP_DIR
