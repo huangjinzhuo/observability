@@ -1,19 +1,26 @@
 # Service Observability with Istio, Prometheus, Grafana, Jaeger, and Kiali
-Open Source Istio with Bookinfo applicaiton
+Sample applications in this demo are Bookinfo from open source Istio repository, and Hyster from Google Cloud Platform. They are both cloned to this repo.
 
 
 ## Table of Contents
-1. [Hypster ](README.md#Hypster)
-1. [Deployment](README.md#Deployment)
 1. [Requirements](README.md#Requirements)
+1. [Istio Installation](README.md#Istio_Installation)
+1. [Deployment](README.md#Deployment)
 1. [Platform Architecture](README.md#Platform_Architecture)
 1. [Challenge](README.md#Challenge)
 1. [DevOps](README.md#DevOps)
 
 
-## Bookinfo and Hypster 
+## Requirements
 
-This repo contains Bookinfo application and Hypster application.
+
+Terraform : https://learn.hashicorp.com/terraform/getting-started/install.html
+AWS-IAM : https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
+AWS Credential: Export AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to Host Environment
+
+
+
+## Istio Installation
 
 
 ## Deployment
@@ -25,15 +32,6 @@ Nginx, Gunicorn and Flask
 
 To deploy Bookinfo:
 
-
-
-
-## Requirements
-
-
-Terraform : https://learn.hashicorp.com/terraform/getting-started/install.html
-AWS-IAM : https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html
-AWS Credential: Export AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY to Host Environment
 
 
 
