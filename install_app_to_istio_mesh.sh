@@ -21,7 +21,6 @@ gcloud container clusters list
 kubectl get pods
 # if you can't use kubectl, give yourself access to the cluster: 
 
-
 # give user access to the cluster
 gcloud container clusters get-credentials $CLUSTER_NAME \
 --project $GCP_PROJECT \
