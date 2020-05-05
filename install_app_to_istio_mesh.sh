@@ -21,6 +21,7 @@ gcloud container clusters list
 kubectl get pods
 # if you can't use kubectl, give yourself access to the cluster: 
 
+
 # give user access to the cluster
 gcloud container clusters get-credentials $CLUSTER_NAME \
 --project $GCP_PROJECT \
@@ -29,8 +30,9 @@ kubectl create clusterrolebinding cluster-admin-binding \
 --clusterrole cluster-admin \
 --user $GCP_USER
 
-# find application path. If not exist, download Istio, which also have sample apps in samples folder
 
+# find application path. If not exist, download Istio, which also have sample apps in samples folder
+[ ! -d /$HOME/bookinfo ] && [printf "Please download Bookinfo application"] && exit 
 export APP_DIR=$HOME/bookinfo
 export ISTIO_VERSION=1.5.0
 mkdir $APP_DIR
@@ -43,75 +45,10 @@ curl -L https://raw.githubusercontent.com/istio/istio/master/release/downloadIst
 cd istio-$ISTIO_VERSION
 export PATH=$PATH:$PWD/bin
 
-# create namespace and, using helm, install Istio Custom Resource Definiations (CRDs)
-# check CRDs. 23 total, or more.
-# install Istio with demo configuation
-# (Istio on GKE add-on can be installed when creating a GKE cluster:
-#     --addons=Istio --istio-config=auth=MTLS_STRICT
-# with the above two options, Istio is installed.
-# Istio open source version is installed with the following lines in this section)
-
-kubectl create namespace istio-system
-
-helm template install/kubernetes/helm/istio-init \
---name istio-init \
---namespace istio-system \
-| kubectl apply -f -
-
-kubectl get crds -n istio-system
-
-helm template install/kubernetes/helm/istio \
---name istio \
---namespace istio-system \
---values install/kubernetes/helm/istio/values-istio-demo.yaml \
-| kubectl apply -f -
-# service installed:    istio-pilot, Mixer(istio-policy and istio-telemetry), istio-galley, istio-citadel, 
-#                       istio-sidecar-injector, istio-ingressgateway, istio-egressgateway, and 
-#                       prometheus, grafana, kiali, zipkin, tracing, jaeger-query, jaeger-agent, jaeger-collector, jaeger-collector-headless
-
 
 kubectl get services -n istio-system
 kubectl get pods --namespace istio-system
 
-# continuously check pods status until they are all Running/Succeeded
-# POD_NO=${kubectl get pods -n istio-system -o jsonpath='{.status}' | wc -l }
-:' Colon Apostrophe starts off a comment block that ends with another Apostrophe 
-
-while true; do
-    POD_STATUS=${kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng" && .status.phase != "Succeeded")].status.phase}'}
-    if $POD_STATUS!=[]
-    then
-        echo "Checking pod status..."
-        ${kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng" && .status.phase != "Succeeded")].metadata.name}: {.items[?(.status.phase != "Runninng" && .status.phase != "Succeeded")].status.phase}'}
-    else
-        exit
-    fi
-done
-
-'
-#### The above while loop logic works only when there is a single nexted condition. for example, remove this:      && .status.phase != "Succeeded"
-#### This is a know issue of JSONPath: JsonPath nested condition and multiple conditions are not working #20352
-#### https://github.com/kubernetes/kubernetes/issues/20352
-#### A workaround is the while loop following:
-
-all_running="false"
-while [[ $all_running != true ]]; do
-    POD_STATUS=($(kubectl get pods -n istio-system -o jsonpath='{.items[*].status.phase}'))
-    all_running="true"
-    for value in "${POD_STATUS[@]}"
-    do
-        echo $value
-        if [[ $value != "Running" ]] && [[ $value != "Succeeded" ]]
-        then
-            echo "Checking pod status..."
-            sleep 5
-            # ${kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng")].metadata.name}: {.items[?(.status.phase != "Runninng" )].status.phase}'}
-            kubectl get pods -n istio-system -o jsonpath='{.items[?(.status.phase != "Runninng")].metadata.name}: {.items[?(.status.phase != "Runninng" )].status.phase}'
-            all_running="false"
-            break
-        fi
-    done
-done
 
 # deploy the Bookinfo application
 kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)

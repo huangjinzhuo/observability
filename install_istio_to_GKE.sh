@@ -13,9 +13,14 @@ printf "GCP_PROJECT=$GCP_PROJECT"
 export CLUSTER_NAME=dev-cluster
 export CLUSTER_ZONE=us-central1-b
 export CLUSTER_VERSION=latest
+export APP_DIR=$HOME/bookinfo
+export ISTIO_VERSION=1.5.2
 printf "CLUSTER_NAME=$CLUSTER_NAME"
 printf "CLUSTER_ZONE=$CLUSTER_ZONE"
 printf "CLUSTER_VERSION=$CLUSTER_VERSION"
+printf "ISTIO_VERSION=$ISTIO_VERSION"
+printf "Press Enter to continue"
+read a
 
 # create the GKE cluster (in default VPC)
 printf "Creating cluster $CLUSTER_NAME ..."
@@ -57,8 +62,7 @@ kubectl create clusterrolebinding cluster-admin-binding \
 --user $GCP_USER
 
 # download Istio, which also have sample apps in samples folder
-export APP_DIR=$HOME/bookinfo
-export ISTIO_VERSION=1.5.0
+
 mkdir $APP_DIR
 cd $APP_DIR
 curl -L https://raw.githubusercontent.com/istio/istio/master/release/downloadIstioCandidate.sh | ISTIO_VERSION=$ISTIO_VERSION sh -
