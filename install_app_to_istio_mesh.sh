@@ -30,6 +30,7 @@ kubectl create clusterrolebinding cluster-admin-binding \
 --user $GCP_USER
 
 
+
 # find application path. If not exist, download Istio, which also have sample apps in samples folder
 [ ! -d /$HOME/bookinfo ] && [printf "Please download Bookinfo application"] && exit 
 export APP_DIR=$HOME/bookinfo
